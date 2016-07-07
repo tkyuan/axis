@@ -12,7 +12,7 @@ import org.axisframework.axis.model.AXSResponse;
 import org.axisframework.axis.model.ResponseStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
@@ -20,6 +20,7 @@ import io.netty.channel.SimpleChannelInboundHandler;
  * @author yuantengkai
  *
  */
+@Sharable
 public class NettyServerHandler extends SimpleChannelInboundHandler<AXSRequest> {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(NettyServerHandler.class);

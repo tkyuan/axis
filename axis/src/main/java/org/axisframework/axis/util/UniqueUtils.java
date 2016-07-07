@@ -14,7 +14,7 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class UniqueUtils {
 	
-	private static AtomicLong atomicIds = new AtomicLong(1);
+	private static final AtomicLong atomicIds = new AtomicLong(1);
 
 	private static final String ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 

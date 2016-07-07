@@ -7,7 +7,6 @@ import java.io.Serializable;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
-import org.axisframework.axis.util.UniqueUtils;
 
 /**
  * @author yuantengkai
@@ -33,10 +32,10 @@ public class AXSRequest implements Serializable {
     
     private int timeout = 3000;
     
-    public AXSRequest(){
-    	this.requestId = UniqueUtils.getUniqueId();
-    }
-    
+	public void setRequestId(String requestId) {
+		this.requestId = requestId;
+	}
+
 	public String getRequestId() {
 		return requestId;
 	}

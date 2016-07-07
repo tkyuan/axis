@@ -35,11 +35,7 @@ public class NettyClientFactory {
 	
 	private final ConcurrentMap<Channel,NettyClient> channel2clientMap = new ConcurrentHashMap<Channel, NettyClient>();
 	
-	private Bootstrap bootstrap;
-	private EventLoopGroup group;
-	
 	private NettyClientFactory(){
-		bootstrap = new Bootstrap();
 	}
 
 	public static NettyClientFactory getInstance() {
@@ -63,7 +59,8 @@ public class NettyClientFactory {
 			if(addr2clientMap.containsKey(key)){
 				return addr2clientMap.get(key);
 			}
-			group = new NioEventLoopGroup();
+			Bootstrap bootstrap = new Bootstrap();
+			EventLoopGroup group = new NioEventLoopGroup();
 	        bootstrap.group(group).channel(NioSocketChannel.class);
 			bootstrap.handler(new NettyClientPipelineFactory(new NettyClientHandler(this)));
 			bootstrap.option(ChannelOption.TCP_NODELAY, true);
@@ -86,8 +83,10 @@ public class NettyClientFactory {
     }
 	
 	public void removeClient(final Channel channel){
-		NettyClient client = channel2clientMap.remove(channel);
-		addr2clientMap.remove(getClientKey(client.getRemoteAddress(), client.getRemotePort()));
+		synchronized(lock){
+			NettyClient client = channel2clientMap.remove(channel);
+			addr2clientMap.remove(getClientKey(client.getRemoteAddress(), client.getRemotePort()));
+		}
 	}
 
 	private String getClientKey(String remoteHost, int port) {

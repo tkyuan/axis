@@ -50,11 +50,14 @@ public class AXSServiceContainer {
 	public void publish(final ServiceMetadata metadata){
 		String uniqueServiceName = metadata.getUniqueServiceName();
 		servicesMap.put(uniqueServiceName, metadata.getObj());
+		if(LOGGER.isInfoEnabled()){
+			LOGGER.info("axis service published,"+metadata);
+		}
 		if(serverStartFlag.compareAndSet(false, true)){
 			NettyServer server = new NettyServer(port, servicesMap);
 			try {
 				server.start();
-				LOGGER.warn("axsservice published,"+metadata);
+				LOGGER.warn("AXIS netty-server started.");
 			} catch (Exception e) {
 				LOGGER.error("netty server start exception,"+metadata,e);
 				throw new RuntimeException(e);
@@ -86,6 +89,7 @@ public class AXSServiceContainer {
 		public Object invoke(Object proxy, Method method, Object[] args)
 				throws Throwable {
 			AXSRequest request = new AXSRequest();
+			request.setRequestId(UniqueUtils.getUniqueId());
 			request.setTargetServiceUniqueName(metadata.getUniqueServiceName());
 			request.setMethodName(method.getName());
 			request.setParameters(args);

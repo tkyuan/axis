@@ -16,7 +16,7 @@ public class UserServiceImpl implements UserService {
 	public UserDto query(String name) {
 		System.out.println("receive from consumer, query name:"+name);
 		UserDto dto = new UserDto();
-		dto.setName("西瓜");
+		dto.setName("西瓜-"+name);
 		dto.setAge(20);
 		return dto;
 	}

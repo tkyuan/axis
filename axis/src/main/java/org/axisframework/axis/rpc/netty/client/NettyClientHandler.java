@@ -37,14 +37,14 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<AXSResponse>
 	@Override
 	public void channelActive(ChannelHandlerContext ctx) throws Exception {
 		if(LOGGER.isInfoEnabled()){
-			LOGGER.info("netty-client connected:"+ctx.channel());
+			LOGGER.info("AXIS netty-client connected:"+ctx.channel());
 		}
 		super.channelActive(ctx);
 	}
 
 	@Override
 	public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-		LOGGER.warn("netty-client connection closed,"+factory.getCientByChannel(ctx.channel()));
+		LOGGER.warn("AXIS netty-client connection closed,"+factory.getCientByChannel(ctx.channel()));
 		factory.removeClient(ctx.channel());
 		super.channelInactive(ctx);
 	}
@@ -54,7 +54,7 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<AXSResponse>
 	@Override
 	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause)
 			throws Exception {
-		LOGGER.warn("AXIS nettyclient exception,"+ctx.channel(), cause);
+		LOGGER.warn("AXIS netty-client exception,"+ctx.channel(), cause);
 		ctx.channel().close();
 	}
 

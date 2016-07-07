@@ -34,11 +34,11 @@ public class NettyClient {
 	//key-requestid
 	private final ConcurrentMap<String, ResponseCallBackFuture> responses = new ConcurrentHashMap<String, ResponseCallBackFuture>();
 	
-	private Channel channel;
+	private final Channel channel;
 	
-	private  String remoteAddress;
+	private final String remoteAddress;
 	
-	private int remotePort;
+	private final int remotePort;
 	
 	public NettyClient(Channel channel){
 		this.channel = channel;

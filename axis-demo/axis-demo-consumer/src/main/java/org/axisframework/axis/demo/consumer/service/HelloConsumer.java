@@ -3,24 +3,31 @@
  */
 package org.axisframework.axis.demo.consumer.service;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import javax.annotation.Resource;
 
 import org.axisframework.axis.api.AXSSpringConsumerBean;
 import org.axisframework.axis.demo.api.HelloService;
 import org.axisframework.axis.demo.api.UserDto;
 import org.axisframework.axis.demo.api.UserService;
+import org.springframework.beans.BeansException;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 
 /**
  * @author yuantengkai
  *
  */
-public class HelloConsumer {
+public class HelloConsumer implements ApplicationContextAware{
 	
 	@Resource
 	private HelloService helloService;
 	
 	@Resource
 	private UserService userService;
+	
+	private AtomicBoolean init = new AtomicBoolean(false);
 	
 	public void init() {
 		startNewThread2Consume();
@@ -34,20 +41,25 @@ public class HelloConsumer {
 				int i = 0;
 				while (true) {
 					try {
-						Thread.sleep(1000);
-						i++;
 						
+						if(!init.get()){
+							continue;
+						}
+						if(i==0){
+							Thread.sleep(5000);
+						}
+						
+						i++;
 						UserDto dto = userService.query("香蕉"+i);
 						System.out.println("receive server response:"+dto);
-						Thread.sleep(2000);
+//						Thread.sleep(1000);
 						String s = helloService.sayHello("tkyuan" + i);
 						System.out.println("receive server response:"+s);
-						Thread.sleep(1000);
+//						Thread.sleep(1000);
 						dto.setName(dto.getName()+i);
 						int r = userService.addUser(dto);
 						System.out.println("receive server response:"+r);
-						Thread.sleep(1000);
-						if(i>3){
+						if(i>20){
 							break;
 						}
 					} catch (InterruptedException e) {
@@ -59,7 +71,7 @@ public class HelloConsumer {
 				}
 			}
 		});
-		t.setDaemon(false);
+		t.setDaemon(true);
 		t.setName("hello-consume-thread");
 		t.start();
 	}
@@ -76,6 +88,12 @@ public class HelloConsumer {
 		bean.setTimeout(8000);
 		bean.init();
 		
+	}
+
+	@Override
+	public void setApplicationContext(ApplicationContext applicationContext)
+			throws BeansException {
+		init.set(true);
 	}
 
 }

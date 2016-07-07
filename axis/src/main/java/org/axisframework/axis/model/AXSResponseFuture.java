@@ -17,7 +17,7 @@ import org.axisframework.axis.AXSException;
  */
 public class AXSResponseFuture {
 	
-	public static ThreadLocal<Future<AXSResponse>> future = new ThreadLocal<Future<AXSResponse>>();
+	private static final ThreadLocal<Future<AXSResponse>> future = new ThreadLocal<Future<AXSResponse>>();
 
 	
 	public static Object getResponseResult(long timeout) throws AXSException, Exception {
