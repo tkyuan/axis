@@ -35,7 +35,14 @@ public class NettyClientFactory {
 	
 	private final ConcurrentMap<Channel,NettyClient> channel2clientMap = new ConcurrentHashMap<Channel, NettyClient>();
 	
+	private final Bootstrap bootstrap;
+	private final EventLoopGroup group;
+	
 	private NettyClientFactory(){
+		bootstrap = new Bootstrap();
+		group = new NioEventLoopGroup();
+		bootstrap.group(group).channel(NioSocketChannel.class);
+		bootstrap.handler(new NettyClientPipelineFactory(new NettyClientHandler(this)));
 	}
 
 	public static NettyClientFactory getInstance() {
@@ -59,10 +66,8 @@ public class NettyClientFactory {
 			if(addr2clientMap.containsKey(key)){
 				return addr2clientMap.get(key);
 			}
-			Bootstrap bootstrap = new Bootstrap();
-			EventLoopGroup group = new NioEventLoopGroup();
-	        bootstrap.group(group).channel(NioSocketChannel.class);
-			bootstrap.handler(new NettyClientPipelineFactory(new NettyClientHandler(this)));
+//	        bootstrap.group(group).channel(NioSocketChannel.class);
+//			bootstrap.handler(new NettyClientPipelineFactory(new NettyClientHandler(this)));
 			bootstrap.option(ChannelOption.TCP_NODELAY, true);
 			bootstrap.option(ChannelOption.SO_REUSEADDR, true);
 	        bootstrap.option(ChannelOption.SO_KEEPALIVE, true);

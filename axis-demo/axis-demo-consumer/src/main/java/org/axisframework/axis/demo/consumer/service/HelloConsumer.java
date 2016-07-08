@@ -34,46 +34,12 @@ public class HelloConsumer implements ApplicationContextAware{
 	}
 
 	private void startNewThread2Consume() {
-		Thread t = new Thread(new Runnable() {
-
-			@Override
-			public void run() {
-				int i = 0;
-				while (true) {
-					try {
-						
-						if(!init.get()){
-							continue;
-						}
-						if(i==0){
-							Thread.sleep(5000);
-						}
-						
-						i++;
-						UserDto dto = userService.query("香蕉"+i);
-						System.out.println("receive server response:"+dto);
-//						Thread.sleep(1000);
-						String s = helloService.sayHello("tkyuan" + i);
-						System.out.println("receive server response:"+s);
-//						Thread.sleep(1000);
-						dto.setName(dto.getName()+i);
-						int r = userService.addUser(dto);
-						System.out.println("receive server response:"+r);
-						if(i>20){
-							break;
-						}
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					} catch (Throwable t) {
-						t.printStackTrace();
-					}
-
-				}
-			}
-		});
-		t.setDaemon(true);
-		t.setName("hello-consume-thread");
-		t.start();
+		for(int i=1;i<=10;i++){
+			Thread t = new Thread(new TaskTest());
+			t.setDaemon(true);
+			t.setName("hello-consume-thread"+i);
+			t.start();
+		}
 	}
 
 	public void setHelloService(HelloService helloService) {
@@ -94,6 +60,46 @@ public class HelloConsumer implements ApplicationContextAware{
 	public void setApplicationContext(ApplicationContext applicationContext)
 			throws BeansException {
 		init.set(true);
+	}
+	
+	
+	private class TaskTest implements Runnable{
+
+		@Override
+		public void run() {
+			int i = 0;
+			while (true) {
+				try {
+					
+					if(!init.get()){
+						continue;
+					}
+					if(i==0){
+						Thread.sleep(5000);
+					}
+					
+					i++;
+					UserDto dto = userService.query("香蕉"+i);
+					System.out.println("receive server response:"+dto);
+//					Thread.sleep(200);
+					String s = helloService.sayHello("tkyuan" + i);
+					System.out.println("receive server response:"+s);
+//					Thread.sleep(1000);
+					dto.setName(dto.getName());
+					int r = userService.addUser(dto);
+					System.out.println("receive server response:"+r);
+					if(i>1000){
+						break;
+					}
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				} catch (Throwable t) {
+					t.printStackTrace();
+				}
+
+			}
+		}
+		
 	}
 
 }

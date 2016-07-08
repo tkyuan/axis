@@ -35,7 +35,7 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<AXSRequest> 
 	protected void channelRead0(ChannelHandlerContext ctx, AXSRequest request)
 			throws Exception {
 		if(LOGGER.isInfoEnabled()){
-			LOGGER.info("netty-server received request:"+request);
+			LOGGER.info("AXIS netty-server received request:"+request);
 		}
 		AXSResponse response = new AXSResponse();  
         response.setRequestId(request.getRequestId()); 
@@ -69,24 +69,20 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<AXSRequest> 
 
 	@Override
 	public void channelActive(ChannelHandlerContext ctx) throws Exception {
-		if(LOGGER.isInfoEnabled()){
-			LOGGER.info("netty-server connected:"+ctx.channel());
-		}
+		LOGGER.warn("##########AXIS netty-server connected,"+ctx.channel());
 		super.channelActive(ctx);
 	}
 
 	@Override
 	public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-		if(LOGGER.isInfoEnabled()){
-			LOGGER.info("netty-server disconnected:"+ctx.channel());
-		}
+		LOGGER.warn("##########AXIS netty-server connection closed,"+ctx.channel());
 		super.channelInactive(ctx);
 	}
 
 	@Override
 	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause)
 			throws Exception {
-		LOGGER.warn("AXIS nettyserver exception,"+ctx.channel(), cause);
+		LOGGER.warn("AXIS netty-server exception,"+ctx.channel(), cause);
 		ctx.channel().close();
 	}
 

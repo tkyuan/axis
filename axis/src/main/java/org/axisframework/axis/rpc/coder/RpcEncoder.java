@@ -26,8 +26,9 @@ public class RpcEncoder extends MessageToByteEncoder{
 			throws Exception {
 		
 		if (ifClazz.isInstance(in)) {  
-            byte[] data = SerializationUtil.encode(in);  
-            out.writeInt(data.length);  
+            byte[] data = SerializationUtil.encode(in);
+            int dataLength = data.length;
+            out.writeInt(dataLength);  
             out.writeBytes(data);  
         }  
 		

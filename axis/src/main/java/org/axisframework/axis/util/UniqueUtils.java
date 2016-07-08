@@ -18,10 +18,10 @@ public class UniqueUtils {
 
 	private static final String ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-	private static String uniqueTime = encodeForPositiveLong(System
+	private static volatile String uniqueTime = encodeForPositiveLong(System
 			.currentTimeMillis() / 1000);
 
-	private static String uniqueName;
+	private static volatile String uniqueName;
 
 	static {
 		Enumeration<NetworkInterface> netInterfaces = null;
@@ -51,11 +51,10 @@ public class UniqueUtils {
 	public static String getUniqueId() {
 
 		long id = atomicIds.getAndIncrement();
-		if (id >= (Long.MAX_VALUE - 100000)) {
+		if (id >= (Long.MAX_VALUE - 10000000)) {
 			atomicIds.set(1);
 			uniqueTime = encodeForPositiveLong(System.currentTimeMillis() / 1000);
 		}
-
 		String uniqueId = uniqueName + "-" + uniqueTime + "-"
 				+ encodeForPositiveLong(id);
 		return uniqueId;
@@ -78,6 +77,7 @@ public class UniqueUtils {
 	}
 	
 	public static void main(String[] args) {
+		System.out.println(Long.MAX_VALUE);
 		System.out.println(getUniqueId());
 		System.out.println(getUniqueId());
 		System.out.println(getUniqueId());
