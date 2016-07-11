@@ -6,8 +6,6 @@ package org.axisframework.axis.demo.consumer.service;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.annotation.Resource;
-
-import org.axisframework.axis.api.AXSSpringConsumerBean;
 import org.axisframework.axis.demo.api.HelloService;
 import org.axisframework.axis.demo.api.UserDto;
 import org.axisframework.axis.demo.api.UserService;
@@ -46,15 +44,6 @@ public class HelloConsumer implements ApplicationContextAware{
 		this.helloService = helloService;
 	}
 	
-	public static void main(String[] args) throws Exception {
-		AXSSpringConsumerBean bean = new AXSSpringConsumerBean();
-		bean.setInterfaceName("org.axisframework.axis.demo.api.HelloService");
-		bean.setTarget("172.24.122.126:9201");
-		bean.setVersion("1.0.0");
-		bean.setTimeout(8000);
-		bean.init();
-		
-	}
 
 	@Override
 	public void setApplicationContext(ApplicationContext applicationContext)
