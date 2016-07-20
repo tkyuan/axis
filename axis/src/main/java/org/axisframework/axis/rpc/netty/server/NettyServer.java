@@ -9,8 +9,11 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+
 import java.util.Map;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author yuantengkai
@@ -31,8 +34,30 @@ public class NettyServer {
 	public NettyServer(int port, Map<String, Object> servicesMap){
 		this.port = port;
 		this.servicesMap = servicesMap;
+//		bossGroup = new NioEventLoopGroup(0,new ThreadFactory() {
+//			AtomicInteger index1 = new AtomicInteger();
+//
+//			public Thread newThread(Runnable r) {
+//				Thread thread = new Thread(r);
+//				thread.setDaemon(true);
+//				thread.setName("NettyServer-BossGroup#"
+//						+ (index1.incrementAndGet()));
+//				return thread;
+//			}
+//		});
 		bossGroup = new NioEventLoopGroup();
 		workerGroup = new NioEventLoopGroup();
+//		workerGroup = new NioEventLoopGroup(0,new ThreadFactory() {
+//			AtomicInteger index2 = new AtomicInteger();
+//
+//			public Thread newThread(Runnable r) {
+//				Thread thread = new Thread(r);
+//				thread.setDaemon(true);
+//				thread.setName("NettyServer-WorkerGroup#"
+//						+ (index2.incrementAndGet()));
+//				return thread;
+//			}
+//		});
 	}
 	
 	public void start() throws Exception{

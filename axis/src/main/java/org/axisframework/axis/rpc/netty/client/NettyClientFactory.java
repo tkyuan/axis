@@ -14,6 +14,8 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import java.net.InetSocketAddress;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.axisframework.axis.AXSException;
 
@@ -41,6 +43,18 @@ public class NettyClientFactory {
 	private NettyClientFactory(){
 		bootstrap = new Bootstrap();
 		group = new NioEventLoopGroup();
+//		group = new NioEventLoopGroup(0,new ThreadFactory() {
+//			
+//			AtomicInteger index = new AtomicInteger();
+//
+//			public Thread newThread(Runnable r) {
+//				Thread thread = new Thread(r);
+//				thread.setDaemon(true);
+//				thread.setName("NettyClient-Group#"
+//						+ (index.incrementAndGet()));
+//				return thread;
+//			}
+//		});
 		bootstrap.group(group).channel(NioSocketChannel.class);
 		bootstrap.handler(new NettyClientPipelineFactory(new NettyClientHandler(this)));
 	}

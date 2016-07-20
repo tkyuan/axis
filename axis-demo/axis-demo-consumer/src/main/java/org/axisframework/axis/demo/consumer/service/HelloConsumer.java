@@ -32,7 +32,7 @@ public class HelloConsumer implements ApplicationContextAware{
 	}
 
 	private void startNewThread2Consume() {
-		for(int i=1;i<=3;i++){
+		for(int i=1;i<=5;i++){
 			Thread t = new Thread(new TaskTest());
 			t.setDaemon(true);
 			t.setName("hello-consume-thread"+i);
