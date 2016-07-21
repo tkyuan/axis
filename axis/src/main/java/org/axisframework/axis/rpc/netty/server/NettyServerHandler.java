@@ -57,6 +57,7 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<AXSRequest> 
         ctx.writeAndFlush(response);  
     }  
 
+	//TODO fix me, now i/o thread, should user thread to improve concurrency
 	private Object handle(AXSRequest request) throws NoSuchMethodException, IllegalArgumentException, Exception {
 		Object service = rpcServiceMap.get(request.getTargetServiceUniqueName());
 		if(service == null){

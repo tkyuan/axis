@@ -31,7 +31,7 @@ public class NettyClient {
 	
 	private static Logger logger = LoggerFactory.getLogger(NettyClient.class);
 	
-	//key-requestid
+	//当前连接client所持有的请求 key-requestid
 	private final ConcurrentMap<String, ResponseCallBackFuture> responses = new ConcurrentHashMap<String, ResponseCallBackFuture>();
 	
 	private final Channel channel;

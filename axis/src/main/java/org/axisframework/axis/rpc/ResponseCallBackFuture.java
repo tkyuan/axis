@@ -43,6 +43,9 @@ public class ResponseCallBackFuture implements Future<AXSResponse>{
 	@Override
 	public AXSResponse get() throws InterruptedException {
         this.countDownLatch.await();
+        if(response == null){
+			throw new AXSException(AXSException.ERROR_RESPONSE, "not responsed.");
+		}
 		return response;
 	}
 

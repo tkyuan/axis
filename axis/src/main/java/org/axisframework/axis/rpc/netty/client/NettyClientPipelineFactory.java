@@ -35,6 +35,7 @@ public class NettyClientPipelineFactory extends ChannelInitializer<SocketChannel
 		ChannelPipeline pipeline = ch.pipeline();
 		pipeline.addLast(new RpcEncoder(AXSRequest.class));
         pipeline.addLast(new RpcDecoder(AXSResponse.class));
+        //空闲心跳检测
         pipeline.addLast(new IdleStateHandler(0, 0, 27, TimeUnit.SECONDS));
         pipeline.addLast(handler);
 	}

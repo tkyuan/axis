@@ -76,6 +76,7 @@ public class NettyClientFactory {
 			return addr2clientMap.get(key);
 		}
 		NettyClient client = null;
+		// create client should sync
 		synchronized(lock){
 			if(addr2clientMap.containsKey(key)){
 				return addr2clientMap.get(key);
