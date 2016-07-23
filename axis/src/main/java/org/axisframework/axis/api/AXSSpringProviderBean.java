@@ -8,7 +8,8 @@ import org.axisframework.axis.util.AXSServiceContainer;
 
 /**
  * @author yuantengkai
- * <bean class="org.axisframework.axis.api.AXSSpringProviderBean" init-method="init">
+ * <bean class="org.axisframework.axis.api.AXSSpringProviderBean" 
+ * 		init-method="init"  destroy-method="destroy">
         <property name="interfaceName" value="接口名"/>
         <property name="version" value="1.0.0"/>
         <property name="serviceTarget" ref="xxxService"/>
@@ -21,6 +22,10 @@ public class AXSSpringProviderBean{
 	public void init(){
 		metadata.initUniqueName();
 		AXSServiceContainer.getInstance().publish(metadata);
+	}
+	
+	public void destroy(){
+		AXSServiceContainer.getInstance().stopServer();
 	}
 	
 	

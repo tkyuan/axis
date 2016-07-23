@@ -4,7 +4,9 @@
 package org.axisframework.axis.rpc.netty.server;
 
 import java.lang.reflect.Method;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.axisframework.axis.AXSException;
 import org.axisframework.axis.model.AXSRequest;
@@ -12,6 +14,8 @@ import org.axisframework.axis.model.AXSResponse;
 import org.axisframework.axis.model.ResponseStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -26,6 +30,8 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<AXSRequest> 
 	private static final Logger LOGGER = LoggerFactory.getLogger(NettyServerHandler.class);
 
 	private  Map<String, Object> rpcServiceMap;
+	
+	private final List<Channel> channels = new CopyOnWriteArrayList<Channel>();
 	
 	public NettyServerHandler(Map<String, Object> rpcServiceMap){
 		this.rpcServiceMap = rpcServiceMap;
@@ -70,12 +76,14 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<AXSRequest> 
 
 	@Override
 	public void channelActive(ChannelHandlerContext ctx) throws Exception {
+		channels.add(ctx.channel());
 		LOGGER.warn("##########AXIS netty-server connected,"+ctx.channel());
 		super.channelActive(ctx);
 	}
 
 	@Override
 	public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+		channels.remove(ctx.channel());
 		LOGGER.warn("##########AXIS netty-server connection closed,"+ctx.channel());
 		super.channelInactive(ctx);
 	}
@@ -86,5 +94,9 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<AXSRequest> 
 		LOGGER.warn("AXIS netty-server exception,"+ctx.channel(), cause);
 		ctx.channel().close();
 	}
+	
+	public List<Channel> getChannels() {
+        return channels;
+    }
 
 }

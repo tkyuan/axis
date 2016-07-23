@@ -14,13 +14,15 @@
 	<bean id="userService" class="org.axisframework.axis.demo.provider.impl.UserServiceImpl"/>
 	
     
-    <bean class="org.axisframework.axis.api.AXSSpringProviderBean" init-method="init">
+    <bean class="org.axisframework.axis.api.AXSSpringProviderBean" 
+    	init-method="init" destroy-method="destroy">
     	<property name="interfaceName" value="org.axisframework.axis.demo.api.HelloService"/>
     	<property name="serviceTarget" ref="helloService"/>
     	<property name="version" value="1.0.0"/>
     </bean>
     
-     <bean class="org.axisframework.axis.api.AXSSpringProviderBean" init-method="init">
+     <bean class="org.axisframework.axis.api.AXSSpringProviderBean" 
+     	init-method="init" destroy-method="destroy">
     	<property name="interfaceName" value="org.axisframework.axis.demo.api.UserService"/>
     	<property name="serviceTarget" ref="userService"/>
     	<property name="version" value="1.0.0"/>

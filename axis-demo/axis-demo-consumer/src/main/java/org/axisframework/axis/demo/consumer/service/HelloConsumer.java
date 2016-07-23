@@ -32,7 +32,7 @@ public class HelloConsumer implements ApplicationContextAware{
 	}
 
 	private void startNewThread2Consume() {
-		for(int i=1;i<=5;i++){
+		for(int i=1;i<=3;i++){
 			Thread t = new Thread(new TaskTest());
 			t.setDaemon(true);
 			t.setName("hello-consume-thread"+i);
@@ -77,7 +77,7 @@ public class HelloConsumer implements ApplicationContextAware{
 					dto.setName(dto.getName());
 					int r = userService.addUser(dto);
 					System.out.println("receive server response:"+r);
-					if(i>1000){
+					if(i>100){
 						break;
 					}
 				} catch (InterruptedException e) {

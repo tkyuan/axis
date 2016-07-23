@@ -9,6 +9,7 @@ import java.lang.reflect.Proxy;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.axisframework.axis.model.AXSRequest;
 import org.axisframework.axis.model.ServiceMetadata;
 import org.axisframework.axis.rpc.netty.client.NettyClient;
@@ -39,6 +40,10 @@ public class AXSServiceContainer {
 
 	private final AtomicBoolean serverStartFlag = new AtomicBoolean(false);
 	
+	private final AtomicBoolean serverStopFlag = new AtomicBoolean(false);
+	
+	private volatile NettyServer server;
+	
 	private AXSServiceContainer() {
 
 	}
@@ -54,10 +59,9 @@ public class AXSServiceContainer {
 			LOGGER.info("axis service published,"+metadata);
 		}
 		if(serverStartFlag.compareAndSet(false, true)){
-			NettyServer server = new NettyServer(port, servicesMap);
+			server = new NettyServer(port, servicesMap);
 			try {
 				server.start();
-				LOGGER.warn("AXIS netty-server started.");
 			} catch (Exception e) {
 				LOGGER.error("netty server start exception,"+metadata,e);
 				throw new RuntimeException(e);
@@ -65,6 +69,20 @@ public class AXSServiceContainer {
 		}
 	}
 
+	
+	public void stopServer(){
+		if(serverStopFlag.compareAndSet(false, true)){
+			try{
+				server.refuseAndCloseConnect();
+				Thread.sleep(1000);
+				server.stop();
+			} catch(Exception e){
+				LOGGER.error("netty server stop exception.",e);
+			}
+		}
+		
+	}
+	
 	public Object consume(final ServiceMetadata metadata) {
 		if (cachedServices.containsKey(metadata.getUniqueServiceName())) {
 			return cachedServices.get(metadata.getUniqueServiceName());
