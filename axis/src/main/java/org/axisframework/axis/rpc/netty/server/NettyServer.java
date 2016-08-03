@@ -10,12 +10,14 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+
+import java.lang.reflect.Method;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.axisframework.axis.util.AXSServiceContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,7 +32,6 @@ public class NettyServer {
 	
 	private final int port;
 	
-	private final Map<String, Object> servicesMap;
 	private final AtomicBoolean startFlag = new AtomicBoolean(false);
 	
 	private final ServerBootstrap serverBootstrap;
@@ -40,11 +41,10 @@ public class NettyServer {
     
     private final NettyServerHandler serverHandler;
 	
-	public NettyServer(int port, Map<String, Object> servicesMap){
+	public NettyServer(int port, Map<String, Object> servicesMap, Map<String,ConcurrentHashMap<String,Method>> serviceMethodMap){
 		this.port = port;
-		this.servicesMap = servicesMap;
 		serverBootstrap = new ServerBootstrap(); 
-		serverHandler = new NettyServerHandler(servicesMap);
+		serverHandler = new NettyServerHandler(servicesMap,serviceMethodMap);
 		
 		bossGroup = new NioEventLoopGroup(0,new ThreadFactory() {
 			AtomicInteger index1 = new AtomicInteger();

@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.axisframework.axis.AXSException;
 import org.axisframework.axis.model.AXSRequest;
 import org.axisframework.axis.model.ServiceMetadata;
 import org.axisframework.axis.rpc.netty.client.NettyClient;
@@ -23,27 +24,29 @@ import org.slf4j.LoggerFactory;
  *
  */
 public class AXSServiceContainer {
-	
-	private static final Logger LOGGER = LoggerFactory.getLogger(AXSServiceContainer.class);
 
+	private static final Logger LOGGER = LoggerFactory
+			.getLogger(AXSServiceContainer.class);
 
 	private static final AXSServiceContainer instance = new AXSServiceContainer();
 
 	// key: uniqueServiceName value: target
 	private final ConcurrentHashMap<String, Object> cachedServices = new ConcurrentHashMap<String, Object>();
 
-	//-----------------provider below---------------------
+	// -----------------provider below---------------------
 	private final int port = 9201;
+
+	// key: uniqueServiceName value: service
+	private final Map<String, Object> servicesMap = new ConcurrentHashMap<String, Object>();
 	
-	//key: uniqueServiceName value: service
-	private final Map<String,Object> servicesMap = new ConcurrentHashMap<String, Object>();
+	private final Map<String,ConcurrentHashMap<String,Method>> serviceMethodMap = new ConcurrentHashMap<String,ConcurrentHashMap<String,Method>>();
 
 	private final AtomicBoolean serverStartFlag = new AtomicBoolean(false);
-	
+
 	private final AtomicBoolean serverStopFlag = new AtomicBoolean(false);
-	
+
 	private volatile NettyServer server;
-	
+
 	private AXSServiceContainer() {
 
 	}
@@ -51,38 +54,51 @@ public class AXSServiceContainer {
 	public static AXSServiceContainer getInstance() {
 		return instance;
 	}
-	
-	public void publish(final ServiceMetadata metadata){
+
+	public void publish(final ServiceMetadata metadata) {
 		String uniqueServiceName = metadata.getUniqueServiceName();
-		servicesMap.put(uniqueServiceName, metadata.getObj());
-		if(LOGGER.isInfoEnabled()){
-			LOGGER.info("axis service published,"+metadata);
+		Object servicePojo = metadata.getObj();
+		servicesMap.put(uniqueServiceName, servicePojo);
+
+		ConcurrentHashMap<String,Method> methodMap = new ConcurrentHashMap<String,Method>();
+		for (Method m : servicePojo.getClass().getMethods()) {
+	         StringBuilder sbParamType = new StringBuilder();
+	         sbParamType.append(m.getName());
+	         sbParamType.append("_");
+	         for (Class<?> paramType : m.getParameterTypes()) {
+	        	 sbParamType.append(paramType.getName());
+	         }
+	         methodMap.put(sbParamType.toString(), m);
+	    }
+		serviceMethodMap.put(uniqueServiceName, methodMap);
+		
+		if (LOGGER.isInfoEnabled()) {
+			LOGGER.info("axis service published," + metadata);
 		}
-		if(serverStartFlag.compareAndSet(false, true)){
-			server = new NettyServer(port, servicesMap);
+		if (serverStartFlag.compareAndSet(false, true)) {
+			server = new NettyServer(port, servicesMap,serviceMethodMap);
 			try {
 				server.start();
 			} catch (Exception e) {
-				LOGGER.error("netty server start exception,"+metadata,e);
+				LOGGER.error("netty server start exception," + metadata, e);
 				throw new RuntimeException(e);
 			}
 		}
 	}
 
-	
-	public void stopServer(){
-		if(serverStopFlag.compareAndSet(false, true)){
-			try{
+	public void stopServer() {
+		if (serverStopFlag.compareAndSet(false, true)) {
+			try {
 				server.refuseAndCloseConnect();
 				Thread.sleep(1000);
 				server.stop();
-			} catch(Exception e){
-				LOGGER.error("netty server stop exception.",e);
+			} catch (Exception e) {
+				LOGGER.error("netty server stop exception.", e);
 			}
 		}
-		
+
 	}
-	
+
 	public Object consume(final ServiceMetadata metadata) {
 		if (cachedServices.containsKey(metadata.getUniqueServiceName())) {
 			return cachedServices.get(metadata.getUniqueServiceName());
@@ -106,29 +122,59 @@ public class AXSServiceContainer {
 		@Override
 		public Object invoke(Object proxy, Method method, Object[] args)
 				throws Throwable {
-			AXSRequest request = new AXSRequest();
-			request.setRequestId(UniqueUtils.getUniqueId());
-			request.setTargetServiceUniqueName(metadata.getUniqueServiceName());
-			request.setMethodName(method.getName());
-			request.setParameters(args);
-			request.setParameterTypes(method.getParameterTypes());
-			request.setTimeout(metadata.getTimeout());
-			// 1.得到链接 2.发送请求 3.返回结果
-			String targetAddr = metadata.getProperty("target");
-			String[] ip_port = targetAddr.split(":");
-			String ip = ip_port[0];
-			int port = Integer.valueOf(ip_port[1]);
-			NettyClient client = NettyClientFactory.getInstance().getClient(ip,
-					port);
-
-			Object rawResult = client.send(request);
-
-			if (rawResult instanceof Throwable) {//如果是server端抛出的异常
-				throw (Throwable) rawResult;
-			}
-			return rawResult;
+			return trueInvoke(metadata, method.getName(),
+					transform2ParamTypeStr(method.getParameterTypes()), args);
 		}
 
+
+	}
+
+	/**
+	 * 远程调用方法
+	 * 
+	 * @param metadata
+	 * @param methodName
+	 * @param parameterTypeStr
+	 * @param args
+	 * @return
+	 * @throws AXSException
+	 * @throws Throwable
+	 */
+	public Object trueInvoke(ServiceMetadata metadata, String methodName,
+			String[] parameterTypeStr, Object[] args) throws AXSException,
+			Exception {
+		AXSRequest request = new AXSRequest();
+		request.setRequestId(UniqueUtils.getUniqueId());
+		request.setTargetServiceUniqueName(metadata.getUniqueServiceName());
+		request.setMethodName(methodName);
+		request.setParameters(args);
+		request.setParameterTypeStr(parameterTypeStr);
+		request.setTimeout(metadata.getTimeout());
+		// 1.得到链接 2.发送请求 3.返回结果
+		String targetAddr = metadata.getProperty("target");
+		String[] ip_port = targetAddr.split(":");
+		String ip = ip_port[0];
+		int port = Integer.valueOf(ip_port[1]);
+		NettyClient client = NettyClientFactory.getInstance().getClient(ip,
+				port);
+
+		Object rawResult = client.send(request);
+
+		if (rawResult instanceof Exception) {// 如果是server端抛出的异常
+			throw (Exception) rawResult;
+		}
+		return rawResult;
+	}
+
+	private String[] transform2ParamTypeStr(Class<?>[] args) {
+		if (args == null || args.length == 0) {
+			return new String[] {};
+		}
+		String[] paramTypeStr = new String[args.length];
+		for (int i = 0; i < args.length; i++) {
+			paramTypeStr[i] = args[i].getName();
+		}
+		return paramTypeStr;
 	}
 
 }

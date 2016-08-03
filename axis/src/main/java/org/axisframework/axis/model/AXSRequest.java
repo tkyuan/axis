@@ -26,7 +26,10 @@ public class AXSRequest implements Serializable {
 	
     private String methodName;
     
+    @Deprecated
     private Class<?>[] parameterTypes;
+    
+    private String[] parameterTypeStr;
     
     private Object[] parameters;
     
@@ -56,12 +59,22 @@ public class AXSRequest implements Serializable {
 		this.methodName = methodName;
 	}
 
+	@Deprecated
 	public Class<?>[] getParameterTypes() {
 		return parameterTypes;
 	}
 
+	@Deprecated
 	public void setParameterTypes(Class<?>[] parameterTypes) {
 		this.parameterTypes = parameterTypes;
+	}
+
+	public String[] getParameterTypeStr() {
+		return parameterTypeStr;
+	}
+
+	public void setParameterTypeStr(String[] parameterTypeStr) {
+		this.parameterTypeStr = parameterTypeStr;
 	}
 
 	public Object[] getParameters() {

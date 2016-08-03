@@ -27,4 +27,12 @@
         <property name="target" value="127.0.0.1:9201"/>
         <property name="timeout" value="5000"/>
 	</bean>
+	
+	<bean id="generalService" class="org.axisframework.axis.api.SuperAXSSpringConsumerBean" init-method="init">
+		<property name="interfaceName" value="org.axisframework.axis.demo.api.UserService"/>
+        <property name="version" value="1.0.0"/>
+        <property name="target" value="127.0.0.1:9201"/>
+        <property name="timeout" value="5000"/>
+	</bean>
+	
 </beans>

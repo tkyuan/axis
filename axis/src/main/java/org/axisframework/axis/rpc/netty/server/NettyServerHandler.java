@@ -6,6 +6,7 @@ package org.axisframework.axis.rpc.netty.server;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.axisframework.axis.AXSException;
@@ -29,12 +30,17 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<AXSRequest> 
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(NettyServerHandler.class);
 
+	//key:serviceUniqueName value: service pojo
 	private  Map<String, Object> rpcServiceMap;
+	
+	//key:key:serviceUniqueName value:key-parmetertype
+	private Map<String,ConcurrentHashMap<String,Method>> serviceMethodMap;
 	
 	private final List<Channel> channels = new CopyOnWriteArrayList<Channel>();
 	
-	public NettyServerHandler(Map<String, Object> rpcServiceMap){
+	public NettyServerHandler(Map<String, Object> rpcServiceMap, Map<String,ConcurrentHashMap<String,Method>> serviceMethodMap){
 		this.rpcServiceMap = rpcServiceMap;
+		this.serviceMethodMap = serviceMethodMap;
 	}
 	
 	@Override
@@ -65,12 +71,30 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<AXSRequest> 
 
 	//TODO fix me, now i/o thread, should user thread to improve concurrency
 	private Object handle(AXSRequest request) throws NoSuchMethodException, IllegalArgumentException, Exception {
+		//1. service
 		Object service = rpcServiceMap.get(request.getTargetServiceUniqueName());
 		if(service == null){
 			throw new AXSException(AXSException.ERROR_SERVER,"service not fount,uniqueName="+request.getTargetServiceUniqueName());
 		}
-		Method method = service.getClass().getMethod(request.getMethodName(),  
-	            request.getParameterTypes());
+		
+		//2. method
+		StringBuilder methodKeyBuilder = new StringBuilder();
+		methodKeyBuilder.append(request.getMethodName());
+		methodKeyBuilder.append("_");
+		
+		String[] paramTypeStr = request.getParameterTypeStr();
+        for (int i = 0; i < paramTypeStr.length; i++) {
+            methodKeyBuilder.append(paramTypeStr[i]);
+        }
+        String methodKey = methodKeyBuilder.toString();
+        
+		Method method = serviceMethodMap.get(request.getTargetServiceUniqueName()).get(methodKey);
+		if(method == null){
+			throw new AXSException(AXSException.ERROR_SERVER,"method not fount,uniqueName="+request.getTargetServiceUniqueName()+",methodKey="+methodKey);
+		}
+//		Method method = service.getClass().getMethod(request.getMethodName(),  
+//	            request.getParameterTypes());
+		//3. invoke
 		return method.invoke(service, request.getParameters());
 	}
 

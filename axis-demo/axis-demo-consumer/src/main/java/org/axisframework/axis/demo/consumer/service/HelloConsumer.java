@@ -6,6 +6,8 @@ package org.axisframework.axis.demo.consumer.service;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.annotation.Resource;
+
+import org.axisframework.axis.api.SuperAXSSpringConsumerBean;
 import org.axisframework.axis.demo.api.HelloService;
 import org.axisframework.axis.demo.api.UserDto;
 import org.axisframework.axis.demo.api.UserService;
@@ -24,6 +26,9 @@ public class HelloConsumer implements ApplicationContextAware{
 	
 	@Resource
 	private UserService userService;
+	
+	@Resource
+	private SuperAXSSpringConsumerBean generalService;
 	
 	private AtomicBoolean init = new AtomicBoolean(false);
 	
@@ -68,7 +73,8 @@ public class HelloConsumer implements ApplicationContextAware{
 					}
 					
 					i++;
-					UserDto dto = userService.query("香蕉"+i);
+					UserDto dto = (UserDto) generalService.invoke("query", new String[]{"java.lang.String"}, new String[]{"香蕉"+i});
+//					UserDto dto = userService.query("香蕉"+i);
 					System.out.println("receive server response:"+dto);
 //					Thread.sleep(200);
 					String s = helloService.sayHello("tkyuan" + i);
