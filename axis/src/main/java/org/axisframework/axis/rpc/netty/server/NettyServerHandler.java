@@ -23,7 +23,7 @@ import io.netty.channel.SimpleChannelInboundHandler;
 
 /**
  * @author yuantengkai
- *
+ * netty4.0 不允许channelHandler贴加多次，除非被标记为Sharable
  */
 @Sharable
 public class NettyServerHandler extends SimpleChannelInboundHandler<AXSRequest> {
