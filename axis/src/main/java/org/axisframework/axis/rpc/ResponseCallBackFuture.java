@@ -33,7 +33,7 @@ public class ResponseCallBackFuture implements Future<AXSResponse>{
 	public void onResponse(final AXSResponse response){
 		synchronized (this) {
 			if(this.response != null){
-				return;
+				return; //已经有响应了
 			}
 			this.response = response;
 		}
